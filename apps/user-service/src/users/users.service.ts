@@ -7,6 +7,7 @@ import {
 import { User } from './entities/user.entity';
 import { UsersRepository } from './repositories/user.repository';
 import { CreateUserDto } from 'libs/common';
+import { EmailAlreadyExistsException, UserNotFoundException } from 'libs/common/exceptions';
 
 @Injectable()
 export class UsersService {
@@ -20,9 +21,7 @@ export class UsersService {
     );
 
     if (existingUser) {
-      throw new ConflictException(
-        'Email is already registered.',
-      );
+      throw new EmailAlreadyExistsException(createUserDto.email);
     }
 
     return this.usersRepository.create(createUserDto);
@@ -36,20 +35,18 @@ export class UsersService {
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
-      throw new NotFoundException(
-        `User with id ${id} not found.`,
-      );
+      throw new UserNotFoundException(id);
     }
 
     return user;
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number) {
     const user = await this.findById(id);
-if (user === null){
-  throw new NotFoundException('user not found')
-}
-     await this.usersRepository.delete(id)
-   
+    if (!user){
+      throw new UserNotFoundException(id)
+    }
+    await this.usersRepository.delete(id)
+      return true
   }
 }
