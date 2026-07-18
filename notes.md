@@ -94,3 +94,17 @@ HTTP Response
 Browser
 
 
+<!-- Architecture after adding data source for migrations -->
+
+                    PostgreSQL
+                         ▲
+                         │
+        ┌────────────────┴──────────────┐
+        │                               │
+ NestJS Runtime                    TypeORM CLI
+ DatabaseModule                    data-source.ts
+        │                               │
+ HTTP/TCP Requests            Generate & Run Migrations
+
+
+ 
