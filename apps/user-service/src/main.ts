@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
-import { UserServiceModule } from './user-service.module';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app =
     await NestFactory.createMicroservice<MicroserviceOptions>(
-      UserServiceModule,
+      AppModule,
       {
         transport: Transport.TCP,  //tell nestjs to use TCP transport for microservices
         options: {
@@ -12,6 +13,13 @@ async function bootstrap() {
           port: 3001, //not http port it is tcp port for the microservice to listen on and communicate with other services
         },
       },
+    );
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     );
 
   await app.listen();

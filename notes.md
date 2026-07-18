@@ -35,3 +35,36 @@ ClientProxy
  TCP
      ▼
 User Service
+
+
+<!--Authentication Microservice -->
+
+                        Browser
+                           │
+                        HTTP REST
+                           ▼
+                    API Gateway
+                           │
+            ┌──────────────┴──────────────┐
+            │                             │
+            │ TCP                         │ TCP
+            ▼                             ▼
+      Auth Service                 User Service
+            │                             │
+            │ asks                        │
+            └──────────────► Find User ◄──┘
+                           │
+                           ▼
+                     User Information
+                           │
+                           ▼
+                    Auth Service
+                           │
+                     Generate JWT
+                           │
+                           ▼
+                     API Gateway
+                           │
+                           ▼
+                        Browser
+
