@@ -68,3 +68,29 @@ User Service
                            ▼
                         Browser
 
+
+
+<!-- microservice global customer exception filter  -->
+
+GET /users/50
+      │
+      ▼
+API Gateway
+      │
+ClientProxy.send()
+      │
+TCP
+      ▼
+User Service
+      │
+throw new UserNotFoundException(50)
+      │
+RpcException payload
+      ▼
+Gateway Filter
+      │
+HTTP Response
+      ▼
+Browser
+
+
