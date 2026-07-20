@@ -92,5 +92,3 @@ Gateway Filter
 HTTP Response
       ▼
 Browser
-
-
