@@ -17,7 +17,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/enr/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/enr/test/jest-e2e.json",
+    "migration:generate": "tsx scripts/migration.ts generate",
+    "migration:run": "tsx scripts/migration.ts run",
+    "migration:revert": "tsx scripts/migration.ts revert",
+    "migration:create": "tsx scripts/migration.ts create",
+    "migration:show": "tsx scripts/migration.ts show"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -55,6 +60,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.23.1",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
