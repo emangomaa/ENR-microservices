@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { ApiGatewayModule } from './api-gateway.module';
+import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MicroserviceExceptionFilter } from './common/filters/microservice-exception.filter';
 async function bootstrap() {
-  const app = await NestFactory.create(ApiGatewayModule);
+  const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
    app.useGlobalPipes(
@@ -17,6 +17,6 @@ async function bootstrap() {
   app.useGlobalFilters(
     new MicroserviceExceptionFilter()
   )
-  await app.listen(configService.get('API_GATEWAY_PORT') ?? 3000);
+  await app.listen(configService.get('PORT') ?? 3000);
 }
 bootstrap();

@@ -20,4 +20,9 @@ export class CreateUserDto {
   @MinLength(6)
   @MaxLength(100)
   password!: string;
+
+
+  @IsString()
+  dateOfBirth!:string;
+
 }
