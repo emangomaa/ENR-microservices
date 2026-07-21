@@ -2,19 +2,29 @@ import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { RabbitMQService } from 'libs/common/rabbitmq';
 async function bootstrap() {
-  const app =
-    await NestFactory.createMicroservice<MicroserviceOptions>(
-      AppModule,
-      {
-        transport: Transport.TCP,  //tell nestjs to use TCP transport for microservices
-        options: {
-          host: '127.0.0.1', // this is the host address for the microservice
-          port: 3001, //not http port it is tcp port for the microservice to listen on and communicate with other services
-        },
-      },
-    );
-    app.useGlobalPipes(
+// creates the application.
+   const app = await NestFactory.create(AppModule);
+
+  //  get instance of rabbitmq service
+  const rabbitMQService = app.get(RabbitMQService);
+
+
+// Nest internally creates:
+// RabbitMQ connection
+// RabbitMQ channel
+// Queue consumer
+  app.connectMicroservice(
+    rabbitMQService.createMicroserviceOptions('user.queue'),
+  );
+
+
+// Nest begins listening for messages.
+// Now your service is waiting.
+  await app.startAllMicroservices();
+
+  app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
         forbidNonWhitelisted: true,
@@ -22,7 +32,6 @@ async function bootstrap() {
       }),
     );
 
-  await app.listen();
 }
 
 bootstrap();

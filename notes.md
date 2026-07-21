@@ -107,4 +107,63 @@ Browser
  HTTP/TCP Requests            Generate & Run Migrations
 
 
+
+<!-- folder architcture after adding rabbitmq -->
+
+apps
+│
+├── api-gateway
+│   │
+│   ├── src
+│   │    ├── app.module.ts
+│   │    ├── main.ts
+│   │    ├── config
+│   │    │      rabbitmq.config.ts
+│   │    │
+│   │    └── users
+│   │
+│   └── .env
+│
+├── user-service
+│   │
+│   ├── src
+│   │    ├── app.module.ts
+│   │    ├── main.ts
+│   │    ├── config
+│   │    │      database.config.ts
+│   │    │      rabbitmq.config.ts
+│   │    │
+│   │    ├── database
+│   │    └── users
+│   │
+│   └── .env
+│
+└── libs
+     └── common
+          └── rabbitmq
  
+
+
+
+<!-- this  Architecture after user service use rqbbitmq broker-->
+                 API Gateway
+                      │
+             ClientProxy.send()
+                      │
+                      ▼
+              RabbitMQ Exchange*
+                      │
+                      ▼
+                 user.queue
+                      │
+                      ▼
+               RabbitMQ Consumer
+                      │
+                      ▼
+        @MessagePattern("users.create")
+                      │
+                      ▼
+                 UsersService
+                      │
+                      ▼
+                 Repository

@@ -1,11 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ApiGatewayController } from './api-gateway.controller';
-import { ApiGatewayService } from './api-gateway.service';
 import { Transport, ClientsModule} from '@nestjs/microservices';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
+import { RabbitMQModule } from 'libs/common/rabbitmq';
+import { UsersModule } from './users/users.module';
+import rabbitmqConfig from './config/rabbitmq.config';
 @Module({
-  imports: [
+  imports: [ConfigModule.forRoot({
+      isGlobal:true,
+      envFilePath:'apps/api-gateway/.env',
+      load:[rabbitmqConfig]
+    }),
+    RabbitMQModule,
+    UsersModule,
     ClientsModule.registerAsync([
   {
     name: 'AUTH_SERVICE',
@@ -32,11 +39,6 @@ import { ConfigService } from '@nestjs/config';
     }),
   },
 ]),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
   ],
-  controllers: [ApiGatewayController],
-  providers: [ApiGatewayService],
 })
-export class ApiGatewayModule {}
+export class AppModule {}
