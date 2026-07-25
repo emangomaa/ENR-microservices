@@ -3,4 +3,7 @@ export const USER_PATTERNS = {
   FIND_ALL:{cmd:'find-all'},
   FIND_ONE:{cmd:'find-one'},
   DELETE_ONE:{cmd:'delete-one'},
+
+
+  USER_CREATED:{cmd:'user-created'}
 };

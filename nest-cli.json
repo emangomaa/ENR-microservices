@@ -37,13 +37,13 @@
         "tsConfigPath": "libs/common/tsconfig.lib.json"
       }
     },
-    "enr": {
+    "notification-service": {
       "type": "application",
-      "root": "apps/enr",
+      "root": "apps/notification-service",
       "entryFile": "main",
-      "sourceRoot": "apps/enr/src",
+      "sourceRoot": "apps/notification-service/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/enr/tsconfig.app.json"
+        "tsConfigPath": "apps/notification-service/tsconfig.app.json"
       }
     },
     "user-service": {
