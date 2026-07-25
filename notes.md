@@ -167,3 +167,39 @@ apps
                       │
                       ▼
                  Repository
+
+
+
+
+
+Desired Architecture
+Notice that the User Service is now both:
+A consumer (receives users.create commands).
+A publisher (publishes user.created events).
+
+                HTTP Request
+                     │
+                     ▼
+              API Gateway
+                     │
+          send('users.create')
+                     │
+                     ▼
+               RabbitMQ Queue
+                     │
+                     ▼
+              User Service
+                     │
+              Create User
+
+                     │
+        emit('user.created')
+                     │
+                     ▼
+               RabbitMQ Exchange
+                     │
+          ┌──────────┴──────────┐
+          ▼                     ▼
+ Notification Service      Future Services
+      Send Email          Analytics / Audit
+

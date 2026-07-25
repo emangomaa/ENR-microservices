@@ -13,32 +13,6 @@ import rabbitmqConfig from './config/rabbitmq.config';
     }),
     RabbitMQModule,
     UsersModule,
-    ClientsModule.registerAsync([
-  {
-    name: 'AUTH_SERVICE',
-    imports: [ConfigModule],
-    inject: [ConfigService],
-    useFactory: (configService: ConfigService) => ({
-      transport: Transport.TCP,
-      options: {
-        host: configService.get<string>('AUTH_SERVICE_HOST'),
-        port: configService.get<number>('AUTH_SERVICE_PORT'),
-      },
-    }),
-  },
-  {
-    name: 'USER_SERVICE',
-    imports: [ConfigModule],
-    inject: [ConfigService],
-    useFactory: (configService: ConfigService) => ({
-      transport: Transport.TCP,
-      options: {
-        host: configService.get<string>('USER_SERVICE_HOST'),
-        port: configService.get<number>('USER_SERVICE_PORT'),
-      },
-    }),
-  },
-]),
   ],
 })
 export class AppModule {}
