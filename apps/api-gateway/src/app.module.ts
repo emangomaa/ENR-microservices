@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { RabbitMQModule } from 'libs/common/rabbitmq';
 import { UsersModule } from './users/users.module';
 import rabbitmqConfig from './config/rabbitmq.config';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [ConfigModule.forRoot({
       isGlobal:true,
@@ -13,6 +14,7 @@ import rabbitmqConfig from './config/rabbitmq.config';
     }),
     RabbitMQModule,
     UsersModule,
+    AuthModule
   ],
 })
 export class AppModule {}

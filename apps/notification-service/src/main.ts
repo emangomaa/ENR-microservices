@@ -3,6 +3,7 @@ import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { RabbitMQService } from 'libs/common/rabbitmq';
+import { NOTIFICATION_QUEUE } from 'libs/common/constants/queues';
 async function bootstrap() {
 // creates the application.
    const app = await NestFactory.create(AppModule);
@@ -16,7 +17,7 @@ async function bootstrap() {
 // RabbitMQ channel
 // Queue consumer
   app.connectMicroservice(
-    rabbitMQService.createMicroserviceOptions('notification.queue'),
+    rabbitMQService.createMicroserviceOptions(NOTIFICATION_QUEUE),
   );
 
 

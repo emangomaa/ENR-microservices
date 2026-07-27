@@ -3,13 +3,13 @@ import { UsersController } from './users.controller';
 import { ClientsModule } from '@nestjs/microservices';
 import { RabbitMQModule, RabbitMQService } from 'libs/common/rabbitmq';
 import UsersService from './users.service';
-import {USER_SERVICE} from 'libs/common/index'
+import { SERVICES } from 'libs/common';
 
 @Module({
   imports: [
     ClientsModule.registerAsync([
       {
-        name: USER_SERVICE,
+        name: SERVICES.USER_SERVICE,
 
         imports: [RabbitMQModule],
 
