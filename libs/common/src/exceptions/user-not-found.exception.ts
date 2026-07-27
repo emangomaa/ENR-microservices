@@ -3,10 +3,10 @@ import { BaseRpcException } from './base-rpc.exception';
 
 
 export class UserNotFoundException extends BaseRpcException {
-  constructor(id: number) {
+  constructor() {
     super(
       HttpStatus.NOT_FOUND,
-      `User with id ${id} not found.`,
+      `User not found.`,
       'Not Found',
     );
   }

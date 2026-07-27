@@ -2,19 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { RabbitMQService } from 'libs/common/rabbitmq';
+import { AUTH_QUEUE } from 'libs/common/constants/queues';
 
 async function bootstrap(){
-const app =
-  await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
-      transport: Transport.TCP,
-      options: {
-        host: '127.0.0.1',
-        port: 3002,
-      },
-    },
-  );
+const app = await NestFactory.create(AppModule)
+
+const rabbitMQService = app.get(RabbitMQService)
+
+app.connectMicroservice(rabbitMQService.createMicroserviceOptions(AUTH_QUEUE))
+
+await app.startAllMicroservices()
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -22,6 +20,6 @@ const app =
       transform: true,
       forbidNonWhitelisted: true,
     }))
-await app.listen()}
+}
 
 bootstrap()
