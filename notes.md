@@ -203,3 +203,64 @@ A publisher (publishes user.created events).
  Notification Service      Future Services
       Send Email          Analytics / Audit
 
+
+
+<!-- start using auth service to signup -->
+Each infrastructure component has a single responsibility:
+
+PostgreSQL → permanent user data.
+RabbitMQ → asynchronous communication.
+Redis → fast temporary state (OTPs, login attempts, refresh tokens, rate limits)
+
+                    Auth Service
+                          │
+          ┌───────────────┼───────────────┐
+          │               │               │
+          ▼               ▼               ▼
+    AuthRepository   RabbitMQService  RedisService
+          │               │               │
+          ▼               ▼               ▼
+     PostgreSQL       RabbitMQ         Redis
+
+
+
+<!-- verify otp -->
+                   POST /auth/verify-otp
+                            │
+                            ▼
+                     API Gateway
+                            │
+                     send(auth.verifyOtp)
+                            │
+                            ▼
+                      Auth Service
+                            │
+          ┌─────────────────┴─────────────────┐
+          │                                   │
+          ▼                                   ▼
+ Find user by email                  Load OTP from Redis
+    PostgreSQL                         otp:user:<id>
+          │                                   │
+          └───────────────┬───────────────────┘
+                          │
+                    User exists?
+                          │
+                          ▼
+                 Account verified?
+                          │
+                          ▼
+                 OTP exists in Redis?
+                          │
+                          ▼
+                   Compare OTP Code
+                    ┌───────────────┐
+             Wrong  │               │ Correct
+                    ▼               ▼
+          attempts++ in Redis    Delete Redis Key
+                    │               │
+         attempts >= 5 ?            ▼
+          Delete Redis Key     Update isVerified
+                    │          PostgreSQL
+                    ▼               │
+              Throw Exception       ▼
+                             Return Success
