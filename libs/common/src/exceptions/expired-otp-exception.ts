@@ -1,10 +1,10 @@
 import { HttpStatus } from "@nestjs/common";
 import { BaseRpcException } from "./base-rpc.exception";
-export class InvalidOtpException extends BaseRpcException {
+export class ExpiredOtpException extends BaseRpcException {
   constructor() {
     super(
       HttpStatus.BAD_REQUEST,
-      'Verification code is invalid.',
+      'Verification code has expired.',
       'Bad Request'
     );
   }

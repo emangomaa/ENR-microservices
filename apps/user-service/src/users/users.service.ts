@@ -7,15 +7,14 @@ import {
 
 import { User } from './entities/user.entity';
 import { UsersRepository } from './repositories/user.repository';
-import { CreateUserDto, USER_PATTERNS } from 'libs/common';
+import { CreateUserDto, SERVICES, USER_PATTERNS } from 'libs/common';
 import { EmailAlreadyExistsException, UserNotFoundException } from 'libs/common/exceptions';
-import { NOTIFICATION_SERVICE } from 'libs/common';
 import { ClientProxy } from '@nestjs/microservices';
 @Injectable()
 export class UsersService {
   constructor(
     private readonly usersRepository: UsersRepository,
-    @Inject(NOTIFICATION_SERVICE) private readonly notificationClient: ClientProxy,
+    @Inject(SERVICES.NOTIFICATION_SERVICE) private readonly notificationClient: ClientProxy,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -50,7 +49,7 @@ export class UsersService {
     const user = await this.usersRepository.findById(id);
 
     if (!user) {
-      throw new UserNotFoundException(id);
+      throw new UserNotFoundException();
     }
 
     return user;
@@ -59,7 +58,7 @@ export class UsersService {
   async delete(id: number) {
     const user = await this.findById(id);
     if (!user){
-      throw new UserNotFoundException(id)
+      throw new UserNotFoundException()
     }
     await this.usersRepository.delete(id)
       return true

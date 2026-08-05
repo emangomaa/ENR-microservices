@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SignupDto } from '../dto/signup.dto';
 import { AUTH_PATTERNS } from 'libs/common';
+import { VerifyOtpDto } from '../dto/verify-otp.dto';
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -12,5 +13,13 @@ export class AuthController {
     @Payload() signupDto: SignupDto,
   ) {
     return this.authService.signup(signupDto);
+  }
+
+
+  @MessagePattern(AUTH_PATTERNS.VERIFY_OTP)
+  verifyOtp(
+    @Payload() verifyOtpDto: VerifyOtpDto,
+  ) {
+    return this.authService.verifyOtp(verifyOtpDto);
   }
 }

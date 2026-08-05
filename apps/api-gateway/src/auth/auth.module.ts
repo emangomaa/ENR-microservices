@@ -3,7 +3,6 @@ import { ClientsModule } from '@nestjs/microservices';
 
 
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { AUTH_QUEUE, RabbitMQModule, RabbitMQService, SERVICES } from 'libs/common';
 
 @Module({
@@ -28,7 +27,6 @@ import { AUTH_QUEUE, RabbitMQModule, RabbitMQService, SERVICES } from 'libs/comm
   ],
 
   providers: [
-    AuthService,
   ],
 })
 export class AuthModule {}

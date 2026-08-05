@@ -1,18 +1,34 @@
-import { Body, Controller, Post } from '@nestjs/common';
-
-import { AuthService } from './auth.service';
-import { SignupDto } from 'libs/common';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { AUTH_PATTERNS, SERVICES, SignupDto, VerifyOtpDto } from 'libs/common';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    private readonly authService: AuthService,
+    @Inject(SERVICES.AUTH_SERVICE) private readonly authClient: ClientProxy,
   ) {}
 
   @Post('signup')
   signup(
     @Body() signupDto: SignupDto,
   ) {
-    return this.authService.signup(signupDto);
+    return firstValueFrom(
+      this.authClient.send(
+        AUTH_PATTERNS.SIGNUP,
+        signupDto,
+      ),
+    );
+  }
+  @Post('verify-otp')
+  verifyOtp(
+    @Body() verifyOtpDto: VerifyOtpDto, // Replace 'any' with the appropriate DTO type
+  ) {
+    return firstValueFrom(
+      this.authClient.send(
+        AUTH_PATTERNS.VERIFY_OTP,
+        verifyOtpDto,
+      ),
+    );
   }
 }
