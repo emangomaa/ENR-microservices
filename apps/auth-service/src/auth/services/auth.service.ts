@@ -11,6 +11,7 @@ import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { ConfigService } from '@nestjs/config';
 import { AuthVerifyOtpEvent } from 'libs/common/events/verify-otp.event';
 import {ResendOtpDto} from '../dto/resend-otp.dto'
+import { ResendOtpTooSoonException } from 'libs/common/exceptions/resend-otp-soon.exception';
 
 @Injectable()
 export class AuthService {
@@ -122,6 +123,12 @@ export class AuthService {
     throw new AccountAlreadyVerified();
   }
 
+  const resendKey = RedisKeys.resend(user.id);
+
+  if (await this.redisService.exists(resendKey)) {
+    throw new ResendOtpTooSoonException();
+  }
+
   const otp = this.otpService.generateOtp();
 
   await this.redisService.setObject(
@@ -133,6 +140,12 @@ export class AuthService {
     this.configService.get<number>('OTP_TTL_SECONDS', 120),
   );
 
+  await this.redisService.setObject(
+    resendKey,
+    '1',
+    this.configService.get<number>('OTP_RESEND_SECONDS', 60),
+  );
+  
   this.notificationClient.emit(
     AUTH_PATTERNS.SIGNUP,
     new AuthSignupEvent(

@@ -66,4 +66,10 @@ export class RedisService {
 ): Promise<number> {
   return this.redis.ttl(key);
 }
+
+async exists(key: string): Promise<boolean> {
+  const result = await this.redis.exists(key);
+
+  return result === 1;
+}
 }
