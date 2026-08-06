@@ -1,6 +1,6 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { AUTH_PATTERNS, SERVICES, SignupDto, VerifyOtpDto } from 'libs/common';
+import { AUTH_PATTERNS, ResendOtpDto, SERVICES, SignupDto, VerifyOtpDto } from 'libs/common';
 import { firstValueFrom } from 'rxjs';
 
 @Controller('auth')
@@ -28,6 +28,17 @@ export class AuthController {
       this.authClient.send(
         AUTH_PATTERNS.VERIFY_OTP,
         verifyOtpDto,
+      ),
+    );
+  }
+  @Post('resend-otp')
+  resendOtp(
+    @Body() resendOtpDto: ResendOtpDto, // Replace 'any' with the appropriate DTO type
+  ) {
+    return firstValueFrom(
+      this.authClient.send(
+        AUTH_PATTERNS.RESEND_OTP,
+        resendOtpDto,
       ),
     );
   }

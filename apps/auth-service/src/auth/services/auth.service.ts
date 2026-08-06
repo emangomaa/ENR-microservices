@@ -10,6 +10,9 @@ import { ClientProxy } from '@nestjs/microservices';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { ConfigService } from '@nestjs/config';
 import { AuthVerifyOtpEvent } from 'libs/common/events/verify-otp.event';
+import {ResendOtpDto} from '../dto/resend-otp.dto'
+import { ResendOtpTooSoonException } from 'libs/common/exceptions/resend-otp-soon.exception';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -101,4 +104,60 @@ export class AuthService {
       message: 'OTP verified successfully.',
     };
   }
+
+
+  // resend OTP method
+  async resendOtp(
+  dto: ResendOtpDto,
+): Promise<{ message: string }> {
+  const email = dto.email.trim().toLowerCase();
+
+  const user =
+    await this.authRepository.findByEmail(email);
+
+  if (!user) {
+    throw new UserNotFoundException();
+  }
+
+  if (user.isVerified) {
+    throw new AccountAlreadyVerified();
+  }
+
+  const resendKey = RedisKeys.resend(user.id);
+
+  if (await this.redisService.exists(resendKey)) {
+    throw new ResendOtpTooSoonException();
+  }
+
+  const otp = this.otpService.generateOtp();
+
+  await this.redisService.setObject(
+    RedisKeys.otp(user.id),
+    {
+      code: otp,
+      attempts: 0,
+    },
+    this.configService.get<number>('OTP_TTL_SECONDS', 120),
+  );
+
+  await this.redisService.setObject(
+    resendKey,
+    '1',
+    this.configService.get<number>('OTP_RESEND_SECONDS', 60),
+  );
+  
+  this.notificationClient.emit(
+    AUTH_PATTERNS.SIGNUP,
+    new AuthSignupEvent(
+      user.id,
+      user.email,
+      otp,
+    ),
+  );
+
+  return {
+    message:
+      'A new verification code has been sent to your email.',
+  };
+}
 }

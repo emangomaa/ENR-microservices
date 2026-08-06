@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SignupDto } from '../dto/signup.dto';
-import { AUTH_PATTERNS } from 'libs/common';
+import { AUTH_PATTERNS, ResendOtpDto } from 'libs/common';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 @Controller()
 export class AuthController {
@@ -21,5 +21,11 @@ export class AuthController {
     @Payload() verifyOtpDto: VerifyOtpDto,
   ) {
     return this.authService.verifyOtp(verifyOtpDto);
+  }
+  @MessagePattern(AUTH_PATTERNS.RESEND_OTP)
+  resendOtp(
+    @Payload() resendOtpDto: ResendOtpDto,
+  ) {
+    return this.authService.resendOtp(resendOtpDto);
   }
 }
