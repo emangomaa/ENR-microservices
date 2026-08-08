@@ -1,6 +1,6 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { AUTH_PATTERNS, ResendOtpDto, SERVICES, SignupDto, VerifyOtpDto } from 'libs/common';
+import { AUTH_PATTERNS, LoginDto, ResendOtpDto, SERVICES, SignupDto, VerifyOtpDto } from 'libs/common';
 import { firstValueFrom } from 'rxjs';
 
 @Controller('auth')
@@ -39,6 +39,18 @@ export class AuthController {
       this.authClient.send(
         AUTH_PATTERNS.RESEND_OTP,
         resendOtpDto,
+      ),
+    );
+  }
+
+   @Post('login')
+  async login(
+    @Body() dto: LoginDto,
+  ) {
+    return firstValueFrom(
+      this.authClient.send(
+        AUTH_PATTERNS.LOGIN,
+        dto,
       ),
     );
   }

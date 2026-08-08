@@ -1,9 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SignupDto } from '../dto/signup.dto';
 import { AUTH_PATTERNS, ResendOtpDto } from 'libs/common';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
+import { LoginDto } from '../dto/login.dto';
+
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -28,4 +30,11 @@ export class AuthController {
   ) {
     return this.authService.resendOtp(resendOtpDto);
   }
+
+  @MessagePattern(AUTH_PATTERNS.LOGIN)
+async login(
+  @Payload() dto: LoginDto,
+) {
+  return this.authService.login(dto);
+}
 }
