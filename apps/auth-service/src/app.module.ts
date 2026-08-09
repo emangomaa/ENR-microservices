@@ -7,6 +7,7 @@ import databaseConfig from "./config/database.config";
 import rabbitmqConfig from "./config/rabbitmq.config";
 import redisConfig from "./config/redis.config";
 import { RedisModule } from "libs/common/redis/redis.module";
+import { JwtModule } from "libs/common";
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -17,6 +18,7 @@ import { RedisModule } from "libs/common/redis/redis.module";
   DatabaseModule,
   RabbitMQModule,
   RedisModule,
+  JwtModule,
   AuthModule
 ],
 })

@@ -264,3 +264,38 @@ Redis → fast temporary state (OTPs, login attempts, refresh tokens, rate limit
                     ▼               │
               Throw Exception       ▼
                              Return Success
+
+
+<!-- login -->
+
+                    SIGNUP
+                      │
+                      ▼
+               Create account
+               isVerified=false
+                      │
+                      ▼
+                 Redis OTP
+                      │
+                      ▼
+               Verify email
+                      │
+                      ▼
+               isVerified=true
+                      │
+                      ▼
+                    LOGIN
+                      │
+               ┌──────┴──────┐
+               │             │
+          Password       Account
+          correct?       verified?
+               │             │
+               └──────┬──────┘
+                      │
+                      ▼
+                  Generate
+                    JWT
+                      │
+                      ▼
+                Access Token

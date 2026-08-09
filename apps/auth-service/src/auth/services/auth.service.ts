@@ -4,14 +4,17 @@ import { SignupDto } from '../dto/signup.dto';
 import { AuthRepository } from '../repositories/auth.repository';
 import { PasswordService } from './password.service';
 import { OtpService } from './otp.service';
-import { PasswordsDoNotMatchException,EmailAlreadyExistsException, UserNotFoundException,AccountAlreadyVerified, OtpAttemptsExceededException, InvalidOtpException } from 'libs/common/exceptions';
-import { AUTH_PATTERNS, AuthSignupEvent, RedisKeys, RedisService, SERVICES } from 'libs/common';
+import { PasswordsDoNotMatchException,EmailAlreadyExistsException, UserNotFoundException,AccountAlreadyVerified, OtpAttemptsExceededException, InvalidOtpException, UnauthenticatedException } from 'libs/common/exceptions';
+import { AUTH_PATTERNS, AuthSignupEvent, JwtService, LoginDto, RedisKeys, RedisService, SERVICES } from 'libs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { ConfigService } from '@nestjs/config';
 import { AuthVerifyOtpEvent } from 'libs/common/events/verify-otp.event';
 import {ResendOtpDto} from '../dto/resend-otp.dto'
 import { ResendOtpTooSoonException } from 'libs/common/exceptions/resend-otp-soon.exception';
+import { InvalidCredentialsException } from 'libs/common/exceptions/invalid-credentials.exception';
+import { UnVerifiedAccountException } from 'libs/common/exceptions/unverified-account.exception';
+import { LoginResponseDto } from '../dto/login-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +26,8 @@ export class AuthService {
     @Inject(SERVICES.NOTIFICATION_SERVICE)
     private readonly notificationClient: ClientProxy,
 
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
+    private readonly jwtService: JwtService
   ) {}
 
   async signup(signupDto: SignupDto): Promise<{ message: string }> {
@@ -100,6 +104,7 @@ export class AuthService {
       user.isVerified = true;
     await this.authRepository.save(user);
 
+    // publish event to user service to create user profile
     return {
       message: 'OTP verified successfully.',
     };
@@ -160,4 +165,32 @@ export class AuthService {
       'A new verification code has been sent to your email.',
   };
 }
-}
+
+  async login(dto:LoginDto): Promise<LoginResponseDto> {
+    const { email, password } = dto;
+    const user = await this.authRepository.findByEmail(email);
+
+    if (!user) {
+      throw new InvalidCredentialsException();
+    }
+    if (!user.isVerified) {
+      throw new UnVerifiedAccountException();
+    }
+
+    const isPasswordValid = await this.passwordService.compare(
+      password,
+      user.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      throw new InvalidCredentialsException();
+    }
+
+    const accessToken = await this.jwtService.sign({
+      sub: user.id,
+      email: user.email
+    });
+
+    return { accessToken };
+  }
+  }
