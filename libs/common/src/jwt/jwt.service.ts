@@ -14,12 +14,13 @@ export class JwtService {
     private readonly jwtService: NestJwtService,
   ) {}
 
-  async sign(payload: JwtPayload){
+  async sign(payload: JwtPayload) {
+    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '30m';
+
     return this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') || '30m',
+      expiresIn: expiresIn as any,
     });
-    
   }
 
   verify(token: string): JwtPayload {
