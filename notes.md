@@ -299,3 +299,8 @@ Redis → fast temporary state (OTPs, login attempts, refresh tokens, rate limit
                       │
                       ▼
                 Access Token
+
+
+
+<!-- create user profile after verify email -->
+
