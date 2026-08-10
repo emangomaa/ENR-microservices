@@ -5,7 +5,7 @@ import { AuthRepository } from '../repositories/auth.repository';
 import { PasswordService } from './password.service';
 import { OtpService } from './otp.service';
 import { PasswordsDoNotMatchException,EmailAlreadyExistsException, UserNotFoundException,AccountAlreadyVerified, OtpAttemptsExceededException, InvalidOtpException, UnauthenticatedException } from 'libs/common/exceptions';
-import { AUTH_PATTERNS, AuthSignupEvent, JwtService, LoginDto, RedisKeys, RedisService, SERVICES } from 'libs/common';
+import { AUTH_PATTERNS, AuthSignupEvent, AuthVerifiedEvent, JwtService, LoginDto, RedisKeys, RedisService, SERVICES } from 'libs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { ConfigService } from '@nestjs/config';
@@ -25,6 +25,8 @@ export class AuthService {
     private readonly configService: ConfigService,
     @Inject(SERVICES.NOTIFICATION_SERVICE)
     private readonly notificationClient: ClientProxy,
+    @Inject(SERVICES.USER_SERVICE)
+    private readonly userClient: ClientProxy,
 
     private readonly redisService: RedisService,
     private readonly jwtService: JwtService
@@ -105,6 +107,11 @@ export class AuthService {
     await this.authRepository.save(user);
 
     // publish event to user service to create user profile
+    this.userClient.emit(
+      AUTH_PATTERNS.AUTH_VERIFIED,
+      new AuthVerifiedEvent(user.id, user.email)
+    );
+
     return {
       message: 'OTP verified successfully.',
     };

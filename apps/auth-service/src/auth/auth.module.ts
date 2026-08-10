@@ -7,7 +7,7 @@ import { AuthController } from "./controllers/auth.controller";
 import { PasswordService } from "./services/password.service";
 import { OtpService } from "./services/otp.service";
 import { ClientsModule } from "@nestjs/microservices";
-import { NOTIFICATION_QUEUE, RabbitMQModule, RabbitMQService, SERVICES } from "libs/common";
+import { NOTIFICATION_QUEUE, RabbitMQModule, RabbitMQService, SERVICES, USER_QUEUE } from "libs/common";
 @Module({
   imports: [
     TypeOrmModule.forFeature([ User]),
@@ -18,6 +18,13 @@ import { NOTIFICATION_QUEUE, RabbitMQModule, RabbitMQService, SERVICES } from "l
         inject:[RabbitMQService],
         useFactory:(rabbitMQService:RabbitMQService)=>
           rabbitMQService.createClientOptions(NOTIFICATION_QUEUE)
+      },
+      {
+        name:SERVICES.USER_SERVICE,
+        imports:[RabbitMQModule],
+        inject:[RabbitMQService],
+        useFactory:(rabbitMQService:RabbitMQService)=>
+          rabbitMQService.createClientOptions(USER_QUEUE)
       }
     ])
 

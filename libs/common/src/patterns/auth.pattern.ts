@@ -3,4 +3,5 @@ export const AUTH_PATTERNS = {
     SIGNUP: { cmd: 'auth.signup' },
     VERIFY_OTP: { cmd: 'auth.verify-otp' },
     RESEND_OTP: { cmd: 'auth.resend-otp' },
+    AUTH_VERIFIED: { cmd: 'auth.verified' },
 };

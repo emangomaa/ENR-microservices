@@ -3,7 +3,7 @@ dotenv.config({
   path: 'apps/user-service/.env',
 });
 import { DataSource } from 'typeorm';
-import { User } from './src/users/entities/user.entity';
+import { UserProfile } from './src/users/entities/user-profile.entity';
 console.log({
   host: process.env.DATABASE_HOST,
   port: process.env.DATABASE_PORT,
@@ -24,7 +24,7 @@ export default new DataSource({
 
   database: process.env.DATABASE_NAME,
 
-  entities: [User],
+  entities: [UserProfile],
 
   migrations: ['apps/user-service/migrations/*.ts'],
 });
