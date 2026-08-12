@@ -7,4 +7,4 @@ export * from "./invalid-otp.exception"
 export * from "./otp-attempts.exception"
 export * from "./resend-otp-soon.exception"
 export * from "./unauthenticated.exception"
-
+export * from "./unauthorized.exception"
