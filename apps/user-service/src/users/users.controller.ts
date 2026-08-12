@@ -4,12 +4,14 @@ import {
 
 import {
   EventPattern,
+  MessagePattern,
   Payload,
 } from '@nestjs/microservices';
 
 import {
   AuthVerifiedEvent,
   AUTH_PATTERNS,
+  USER_PATTERNS,
 } from 'libs/common';
 
 import {
@@ -28,5 +30,11 @@ export class UsersController {
   ) {
     await this.usersService
       .createProfileFromAuth(event);
+  }
+  @MessagePattern(USER_PATTERNS.FIND_ONE)
+  async getUser(
+    @Payload() id: number,
+  ) {
+    return this.usersService.findUser(id);
   }
 }

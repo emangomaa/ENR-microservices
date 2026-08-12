@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { UsersController } from './users.controller';
 import { ClientsModule } from '@nestjs/microservices';
 import { RabbitMQModule, RabbitMQService } from 'libs/common/rabbitmq';
-import UsersService from './users.service';
 import { SERVICES } from 'libs/common';
 
 @Module({
@@ -23,6 +22,6 @@ import { SERVICES } from 'libs/common';
 
   controllers: [UsersController],
 
-  providers: [UsersService],
+  providers: [],
 })
 export class UsersModule {}

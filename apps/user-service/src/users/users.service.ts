@@ -38,4 +38,12 @@ export class UsersService {
       avatar: null,
     });
   }
+
+  async findUser(
+    id: number,
+  ) {
+    return this.usersRepository.findByAuthUserId(
+      id,
+    );
+  }
 }
