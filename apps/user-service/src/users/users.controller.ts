@@ -37,4 +37,10 @@ export class UsersController {
   ) {
     return this.usersService.findUser(id);
   }
+  @MessagePattern(USER_PATTERNS.DELETE_ONE)
+  async deleteUser(
+    @Payload() id: number,
+  ) {
+    return this.usersService.deleteUser(id);
+  }
 }
