@@ -1,5 +1,4 @@
 import { PrimaryGeneratedColumn,Column,CreateDateColumn,UpdateDateColumn, Entity } from "typeorm";
-
 @Entity()
 export class User{
     @PrimaryGeneratedColumn()
@@ -13,6 +12,9 @@ export class User{
 
     @Column({ default: false, }) 
     isVerified!: boolean;
+
+    @Column({ default: 'USER', })
+        role!: string;
 
     @CreateDateColumn() 
     createdAt!: Date; 
