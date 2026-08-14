@@ -58,6 +58,7 @@ export class JwtStrategy
     return {
       id: payload.sub,
       email: payload.email,
+      role: payload.role,
     };
   }
-}
+};
