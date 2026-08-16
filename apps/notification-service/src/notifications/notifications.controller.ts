@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { NotificationsService } from './notifications.service';
-import { AUTH_PATTERNS, AuthSignupEvent, USER_PATTERNS, UserCreatedEvent } from 'libs/common';
+import { AUTH_PATTERNS, AuthSignupEvent, ForgetPasswordEvent, USER_PATTERNS, UserCreatedEvent } from 'libs/common';
 
 @Controller()
 export class NotificationsController {
@@ -16,6 +16,11 @@ export class NotificationsController {
   @EventPattern(AUTH_PATTERNS.SIGNUP) 
   handleUserSignup( @Payload() payload: AuthSignupEvent, ) {
      return this.notificationsService.handleUserSignup(payload);
+     }
+  
+  @EventPattern(AUTH_PATTERNS.FORGOT_PASSWORD) 
+  handleUserForgotPassword( @Payload() payload: ForgetPasswordEvent, ) {
+     return this.notificationsService.handleUserForgotPassword(payload);
      }
 }
 

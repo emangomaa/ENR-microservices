@@ -4,17 +4,17 @@ import { SignupDto } from '../dto/signup.dto';
 import { AuthRepository } from '../repositories/auth.repository';
 import { PasswordService } from './password.service';
 import { OtpService } from './otp.service';
-import { PasswordsDoNotMatchException,EmailAlreadyExistsException, UserNotFoundException,AccountAlreadyVerified, OtpAttemptsExceededException, InvalidOtpException, UnauthenticatedException } from 'libs/common/exceptions';
-import { AUTH_PATTERNS, AuthSignupEvent, AuthVerifiedEvent, JwtService, LoginDto, RedisKeys, RedisService, SERVICES } from 'libs/common';
+import { PasswordsDoNotMatchException,EmailAlreadyExistsException, UserNotFoundException,AccountAlreadyVerified, NewPasswordSameAsOldException, IncorrectCurrentPasswordException } from 'libs/common';
+import { AUTH_PATTERNS, AuthSignupEvent, AuthVerifiedEvent, ForgotPasswordDto, JwtService, LoginDto, RedisKeys, RedisService, SERVICES } from 'libs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { ConfigService } from '@nestjs/config';
-import { AuthVerifyOtpEvent } from 'libs/common/events/verify-otp.event';
 import {ResendOtpDto} from '../dto/resend-otp.dto'
-import { ResendOtpTooSoonException } from 'libs/common/exceptions/resend-otp-soon.exception';
-import { InvalidCredentialsException } from 'libs/common/exceptions/invalid-credentials.exception';
-import { UnVerifiedAccountException } from 'libs/common/exceptions/unverified-account.exception';
+import {UnVerifiedAccountException, InvalidCredentialsException,ResendOtpTooSoonException } from 'libs/common';
 import { LoginResponseDto } from '../dto/login-response.dto';
+import { ForgetPasswordEvent } from 'libs/common/events/forget-password.event';
+import { ResetPasswordDto } from 'libs/common/dto/auth/reset-password.dto';
+import { ChangePasswordDto } from 'libs/common/dto/auth/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +29,7 @@ export class AuthService {
     private readonly userClient: ClientProxy,
 
     private readonly redisService: RedisService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {}
 
   async signup(signupDto: SignupDto): Promise<{ message: string }> {
@@ -101,7 +101,8 @@ export class AuthService {
       throw new AccountAlreadyVerified();
     } 
 
-     await this.otpService.verifyOtp(otp, user.id);
+    const otpKey = RedisKeys.otp(user.id);
+     await this.otpService.verifyOtp(otp, otpKey);
 
       user.isVerified = true;
     await this.authRepository.save(user);
@@ -200,4 +201,98 @@ export class AuthService {
 
     return { accessToken };
   }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
+    const email = dto.email.trim().toLowerCase();
+    const user = await this.authRepository.findByEmail(email);
+
+    if (!user) {
+      throw new InvalidCredentialsException();
+    }
+
+    // Generate OTP and store it in Redis
+    const otp = this.otpService.generateOtp();
+    const otpKey = RedisKeys.resetOtp(user.id);
+    await this.redisService.setObject(
+      otpKey,
+      { code: otp },
+      this.configService.get<number>('OTP_TTL_SECONDS', 120)
+    );
+
+    // Send OTP to user's email
+    this.notificationClient.emit(
+      AUTH_PATTERNS.FORGOT_PASSWORD,
+      new ForgetPasswordEvent(user.id, user.email, otp)
+    );
   }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const { email, otp, newPassword, confirmPassword } = dto;
+    const user = await this.authRepository.findByEmail(email);  
+      if (!user) {
+      throw new InvalidCredentialsException();
+    } 
+
+    if (newPassword !== confirmPassword) {
+      throw new PasswordsDoNotMatchException();
+    }
+
+    const sameAsOld =
+    await this.passwordService.compare(
+      dto.newPassword,
+      user.passwordHash,
+    );
+
+  if (sameAsOld) {
+    throw new NewPasswordSameAsOldException();
+  }
+
+
+    const otpKey = RedisKeys.resetOtp(user.id);
+    await this.otpService.verifyOtp(otp, otpKey);
+
+    const newPasswordHash = await this.passwordService.hash(newPassword);
+    await this.authRepository.updatePassword(user.id, newPasswordHash);
+    return {
+      message: 'Password reset successful.',
+    };
+  }
+  async changePassword(userId: number, dto: ChangePasswordDto): Promise<{ message: string }> {
+    const { currentPassword, newPassword, confirmPassword } = dto;
+    const user = await this.authRepository.findById(userId);
+      if (!user) {
+      throw new InvalidCredentialsException();
+    } 
+
+    if (newPassword !== confirmPassword) {
+      throw new PasswordsDoNotMatchException();
+    }
+
+    const currentPasswordValid =
+    await this.passwordService.compare(
+      currentPassword,
+      user.passwordHash,
+    );
+
+  if (!currentPasswordValid) {
+    throw new IncorrectCurrentPasswordException();
+  }
+    const sameAsOld =
+    await this.passwordService.compare(
+      newPassword,
+      user.passwordHash,
+    );
+
+  if (sameAsOld) {
+    throw new NewPasswordSameAsOldException();
+  }
+
+    const newPasswordHash = await this.passwordService.hash(newPassword);
+    await this.authRepository.updatePassword(user.id, newPasswordHash);
+
+    
+    return {
+      message: 'Password changed successfully.',
+    };
+  }
+}
