@@ -30,9 +30,8 @@ export class OtpService {
     );
   }
 
-  async verifyOtp(otp: string,userId: number): Promise<void> {
+  async verifyOtp(otp: string,key: string): Promise<void> {
   
-    const key = RedisKeys.otp(userId);
     const otpData = await this.redisService.getObject<OtpData>(key);
 
     if (!otpData) {

@@ -40,4 +40,16 @@ export class AuthRepository {
   async update(user: User): Promise<User> {
     return this.repository.save(user);
   }
+
+  async updatePassword(
+  userId: number,
+  passwordHash: string,
+): Promise<void> {
+  await this.repository.update(
+    userId,
+    {
+      passwordHash,
+    },
+  );
+}
 }

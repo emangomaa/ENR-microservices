@@ -304,3 +304,22 @@ Redis → fast temporary state (OTPs, login attempts, refresh tokens, rate limit
 
 <!-- create user profile after verify email -->
 
+<!-- Reset & Change password -->
+
+                    Password Management
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+          RESET PASSWORD            CHANGE PASSWORD
+          unauthenticated            authenticated
+              │                         │
+       email + OTP              JWT + current password
+       + new password            + new password
+              │                         │
+              └────────────┬────────────┘
+                           │
+                    Validate new password
+                           │
+                    Hash with bcrypt
+                           │
+                    Update password

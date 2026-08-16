@@ -1,7 +1,7 @@
 import {
   Injectable,
 } from '@nestjs/common';
-import { AuthSignupEvent, UserCreatedEvent } from 'libs/common';
+import { AuthSignupEvent, UserCreatedEvent,ForgetPasswordEvent } from 'libs/common';
 
 @Injectable()
 export class NotificationsService {
@@ -13,5 +13,9 @@ export class NotificationsService {
   handleUserSignup(payload:AuthSignupEvent){
     console.log(payload)
       console.log(`Sending welcome email to ${payload.email}`,)
+  }
+
+  handleUserForgotPassword(payload: ForgetPasswordEvent){
+    console.log(`Sending forgot password email to ${payload.email} with OTP: ${payload.otp}`,)
   }
 }

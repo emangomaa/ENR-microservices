@@ -4,6 +4,9 @@ export const RedisKeys = {
         return `otp:user:${userId}`;
     },
      resend(userId: number): string {
-    return `resend:user:${userId}`;
+    return `resend-otp:user:${userId}`;
+  },
+     resetOtp(userId: number): string {
+    return `reset-password:user:${userId}`;
   },
 };
