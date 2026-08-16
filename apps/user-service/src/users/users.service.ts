@@ -9,7 +9,7 @@ import {
 import {
   UsersRepository,
 } from './repositories/users.repository';
-
+import { UserNotFoundException } from 'libs/common';
 @Injectable()
 export class UsersService {
   constructor(
@@ -43,6 +43,23 @@ export class UsersService {
     id: number,
   ) {
     return this.usersRepository.findByAuthUserId(
+      id,
+    );
+  }
+  async deleteUser(
+    id: number,
+  ) {
+
+    // check if the user exists before attempting to delete
+    const existingProfile =
+      await this.usersRepository.findById(
+        id,
+      );
+    if (!existingProfile) {
+      throw new UserNotFoundException();
+    }
+
+    return this.usersRepository.deleteUser(
       id,
     );
   }

@@ -39,4 +39,21 @@ export class UsersRepository {
 
     return this.repository.save(profile);
   }
+
+  async findById(
+    id: number,
+  ): Promise<UserProfile | null> {
+    return this.repository.findOne({
+      where: {
+        id,
+      },
+    });
+  }
+  async deleteUser(
+    id: number,
+  ): Promise<void> {
+    await this.repository.delete({
+      id: id,
+    });
+  }
 }
