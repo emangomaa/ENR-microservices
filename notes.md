@@ -323,3 +323,51 @@ Redis → fast temporary state (OTPs, login attempts, refresh tokens, rate limit
                     Hash with bcrypt
                            │
                     Update password
+
+
+
+
+<!-- Refresh Tokens & Redis Sessions -->
+
+                    LOGIN
+                      │
+                      ▼
+                 Auth Service
+                      │
+             ┌────────┴────────┐
+             │                 │
+             ▼                 ▼
+        Access Token      Refresh Token
+        JWT / 15m          random / 7d
+             │                 │
+             │                 ▼
+             │              Redis
+             │          session:user:15:id
+             │
+             ▼
+           Client
+
+
+
+           <!-- When the access token expires: -->
+
+         Client
+  │
+  │ POST /auth/refresh
+  │ refreshToken
+  ▼
+API Gateway
+  │
+  ▼
+Auth Service
+  │
+  ▼
+Redis
+  │
+  ├── session exists?
+  ├── token hash matches?
+  └── not expired?
+       │
+       ▼
+Generate new access token  
+
