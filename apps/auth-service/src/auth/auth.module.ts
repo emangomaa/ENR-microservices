@@ -8,6 +8,7 @@ import { PasswordService } from "./services/password.service";
 import { OtpService } from "./services/otp.service";
 import { ClientsModule } from "@nestjs/microservices";
 import { NOTIFICATION_QUEUE, RabbitMQModule, RabbitMQService, SERVICES, USER_QUEUE } from "libs/common";
+import { SessionService } from "./services/session.service";
 @Module({
   imports: [
     TypeOrmModule.forFeature([ User]),
@@ -30,7 +31,7 @@ import { NOTIFICATION_QUEUE, RabbitMQModule, RabbitMQService, SERVICES, USER_QUE
 
 ],
   controllers: [AuthController],
-  providers: [AuthService,AuthRepository,PasswordService,OtpService],
+  providers: [AuthService,AuthRepository,PasswordService,OtpService,SessionService],
   exports:[PasswordService,OtpService]
 })
 export class AuthModule {}

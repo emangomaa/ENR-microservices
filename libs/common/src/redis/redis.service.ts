@@ -72,4 +72,31 @@ async exists(key: string): Promise<boolean> {
 
   return result === 1;
 }
+
+
+async sadd(
+  key: string,
+  value: string,
+): Promise<number> {
+  return this.redis.sadd(
+    key,
+    value,
+  );
+}
+
+async smembers(
+  key: string,
+): Promise<string[]> {
+  return this.redis.smembers(key);
+}
+
+async srem(
+  key: string,
+  value: string,
+): Promise<number> {
+  return this.redis.srem(
+    key,
+    value,
+  );
+}
 }

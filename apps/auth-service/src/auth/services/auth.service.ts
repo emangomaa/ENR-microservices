@@ -15,7 +15,8 @@ import { LoginResponseDto } from '../dto/login-response.dto';
 import { ForgetPasswordEvent } from 'libs/common/events/forget-password.event';
 import { ResetPasswordDto } from 'libs/common/dto/auth/reset-password.dto';
 import { ChangePasswordDto } from 'libs/common/dto/auth/change-password.dto';
-
+import { SessionService } from './session.service';
+import { InvalidRefreshTokenException } from 'libs/common/exceptions/invalid-refresh-token.exception';
 @Injectable()
 export class AuthService {
   constructor(
@@ -30,6 +31,7 @@ export class AuthService {
 
     private readonly redisService: RedisService,
     private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async signup(signupDto: SignupDto): Promise<{ message: string }> {
@@ -200,9 +202,105 @@ export class AuthService {
       role: user.role
     });
 
-    return { accessToken };
+
+// create refresh token and redis sessions
+
+const { refreshToken } = await this.sessionService.createSession(user.id);
+    
+
+return { accessToken, refreshToken };
   }
 
+
+async refreshAccessToken(
+  refreshToken: string,
+) {
+  const parts =
+    refreshToken.split('.');
+
+  if (parts.length !== 3) {
+    throw new InvalidRefreshTokenException();
+  }
+
+  const [
+    userIdString,
+    sessionId,
+  ] = parts;
+
+  const userId =
+    Number(userIdString);
+
+  if (
+    !Number.isInteger(userId) ||
+    !sessionId
+  ) {
+    throw new InvalidRefreshTokenException();
+  }
+
+  const valid =
+    await this.sessionService.validateSession(
+      userId,
+      sessionId,
+      refreshToken,
+    );
+
+  if (!valid) {
+    throw new InvalidRefreshTokenException();
+  }
+
+  const user =
+    await this.authRepository.findById(
+      userId,
+    );
+
+  if (!user) {
+    throw new InvalidRefreshTokenException();
+  }
+
+  const accessToken =
+   await this.jwtService.sign({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
+
+  return {
+    accessToken,
+  };
+}
+
+async logout(
+  userId: number,
+  refreshToken: string,
+) {
+  const parts =
+    refreshToken.split('.');
+
+  if (parts.length !== 3) {
+    throw new InvalidRefreshTokenException();
+  }
+
+  const [
+    tokenUserId,
+    sessionId,
+  ] = parts;
+
+  if (
+    Number(tokenUserId) !== userId
+  ) {
+    throw new InvalidRefreshTokenException();
+  }
+
+  await this.sessionService.deleteSession(
+    userId,
+    sessionId,
+  );
+
+  return {
+    message:
+      'Logged out successfully.',
+  };
+}
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
     const email = dto.email.trim().toLowerCase();
     const user = await this.authRepository.findByEmail(email);
@@ -254,6 +352,14 @@ export class AuthService {
 
     const newPasswordHash = await this.passwordService.hash(newPassword);
     await this.authRepository.updatePassword(user.id, newPasswordHash);
+    await this.redisService.del(
+  otpKey
+);
+
+await this.sessionService.deleteAllSessions(
+  user.id,
+);
+
     return {
       message: 'Password reset successful.',
     };

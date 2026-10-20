@@ -7,6 +7,8 @@ import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
+import { RefreshTokenDto } from 'apps/auth-service/src/auth/dto/refresh-token.dto';
+import { LogoutDto } from 'apps/auth-service/src/auth/dto/logout.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -61,9 +63,40 @@ export class AuthController {
   }
 
 
+  @Post('refresh')
+async refresh(
+  @Body()
+  dto: RefreshTokenDto,
+) {
+  return firstValueFrom(
+    this.authClient.send(
+      AUTH_PATTERNS.REFRESH_TOKEN,
+      dto,
+    ),
+  );
+}
+
+@Post('logout')
+@UseGuards(JwtAuthGuard)
+async logout(
+  @CurrentUser()
+  user: AuthenticatedUser,
+
+  @Body()
+  dto: LogoutDto,
+) {
+  return firstValueFrom(
+    this.authClient.send(
+      AUTH_PATTERNS.LOGOUT,
+      {
+        userId: user.id,
+        refreshToken: dto.refreshToken,
+      },
+    ));
+}
   @Post('forgot-password')
   async forgotPassword(
-    @Body() dto: ForgotPasswordDto, // Replace 'any' with the appropriate DTO type
+    @Body() dto: ForgotPasswordDto,
   ) {
     
       this.authClient.emit(
@@ -83,8 +116,8 @@ export class AuthController {
     );
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('change-password')
-@UseGuards(JwtAuthGuard)
   async changePassword(
     @Body() dto: ChangePasswordDto, 
     @CurrentUser() user: AuthenticatedUser, // Assuming the user object has an 'id' property
