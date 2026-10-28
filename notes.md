@@ -304,6 +304,24 @@ Redis → fast temporary state (OTPs, login attempts, refresh tokens, rate limit
 
 <!-- create user profile after verify email -->
 
+                  POST /auth/verify-otp
+                        │
+                        ▼
+                  Redis Verification
+                        │
+                  Update isVerified
+                        │
+                  emit(auth.verified)
+                        ▼
+                  RabbitMQ
+                        ▼
+                  User Service
+                        │
+                  Create Profile
+
+
+
+
 <!-- Reset & Change password -->
 
                     Password Management
