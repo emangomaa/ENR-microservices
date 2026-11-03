@@ -25,6 +25,15 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## API documentation
+
+The HTTP API gateway serves interactive Swagger UI at `/docs` and its OpenAPI
+JSON document at `/docs-json` (for example, `http://localhost:3000/docs` when
+the gateway listens on port 3000). The documentation covers the gateway's
+authentication and user endpoints. The auth, user, and notification services
+are RabbitMQ message consumers rather than HTTP servers, so their message
+patterns are not exposed through Swagger.
+
 ## Project setup
 
 ```bash
