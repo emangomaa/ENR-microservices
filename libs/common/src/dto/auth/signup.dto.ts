@@ -5,9 +5,10 @@ import {
   Matches,
   MinLength,
 } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SignupDto {
-    
+  @ApiProperty({ example: 'user@example.com', description: 'Account email address.' })
   @IsNotEmpty({
     message: 'Email is required.',
   })
@@ -19,6 +20,7 @@ export class SignupDto {
   )
   email!: string;
 
+  @ApiProperty({ example: 'Str0ng!Pass', minLength: 8, description: 'Password with uppercase, lowercase, number, and special character.' })
   @IsNotEmpty({
     message: 'Password is required.',
   })
@@ -35,6 +37,7 @@ export class SignupDto {
   )
   password!: string;
 
+  @ApiProperty({ example: 'Str0ng!Pass', description: 'Must match password.' })
   @IsNotEmpty({
     message: 'Confirm password is required.',
   })
