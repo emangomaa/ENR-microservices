@@ -99,4 +99,8 @@ async srem(
     value,
   );
 }
+
+async incr(key: string): Promise<number> {
+  return this.redis.incr(key);
+}
 }

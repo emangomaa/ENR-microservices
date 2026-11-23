@@ -6,17 +6,20 @@ import rabbitmqConfig from './config/rabbitmq.config';
 import { AuthModule } from './authService/auth.module';
 import { JwtModule } from 'libs/common/jwt/jwt.module';
 import { AuthorizationModule } from './auth/authorization.module';
+import { RedisModule } from 'libs/common/redis/redis.module';
+import redisConfig from 'apps/auth-service/src/config/redis.config';
 @Module({
   imports: [ConfigModule.forRoot({
       isGlobal:true,
       envFilePath:'apps/api-gateway/.env',
-      load:[rabbitmqConfig]
+      load:[rabbitmqConfig,redisConfig],
     }),
     RabbitMQModule,
+    RedisModule,
     JwtModule,
     AuthorizationModule,
     UsersModule,
-    AuthModule
+    AuthModule,
   ],
 })
 export class AppModule {}

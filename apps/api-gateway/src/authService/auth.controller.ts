@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { AUTH_PATTERNS, ForgotPasswordDto, LoginDto, ResendOtpDto, SERVICES, SignupDto, VerifyOtpDto } from 'libs/common';
 import { ChangePasswordDto } from 'libs/common/dto/auth/change-password.dto';
@@ -17,27 +17,38 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-
+import { SignupRateLimitGuard } from '../rateLimit/signup-rate-limit.guard';
+import {SignupRateLimitService} from '../rateLimit/signup-rate-limit.service';
+import { ClientIp } from '../auth/decorators/client-ip.decorator';
 @Controller('auth')
 @ApiTags('Authentication')
 export class AuthController {
   constructor(
     @Inject(SERVICES.AUTH_SERVICE) private readonly authClient: ClientProxy,
+    private readonly signupRateLimitService: SignupRateLimitService,
   ) {}
 
+ 
   @Post('signup')
+  @UseGuards(SignupRateLimitGuard)
   @ApiOperation({ summary: 'Create an account' })
   @ApiCreatedResponse({ description: 'Account created; verification instructions sent.' })
   @ApiBadRequestResponse({ description: 'The request body is invalid.' })
-  signup(
+
+  async signup(
     @Body() signupDto: SignupDto,
+  @ClientIp() ip: string,
   ) {
-    return firstValueFrom(
+    const result = await firstValueFrom(
       this.authClient.send(
         AUTH_PATTERNS.SIGNUP,
         signupDto,
       ),
     );
+
+    await this.signupRateLimitService.recordSignup(ip);
+
+    return result;
   }
   @Post('verify-otp')
   @ApiOperation({ summary: 'Verify an account using its one-time password' })
