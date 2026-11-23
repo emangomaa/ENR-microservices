@@ -4,7 +4,7 @@ import { ClientsModule } from '@nestjs/microservices';
 
 import { AuthController } from './auth.controller';
 import { AUTH_QUEUE, RabbitMQModule, RabbitMQService, SERVICES } from 'libs/common';
-
+import { RateLimitModule } from '../rateLimit/rate-limit.module';
 @Module({
   imports: [
     ClientsModule.registerAsync([
@@ -20,6 +20,7 @@ import { AUTH_QUEUE, RabbitMQModule, RabbitMQService, SERVICES } from 'libs/comm
           ),
       },
     ]),
+    RateLimitModule,
   ],
 
   controllers: [

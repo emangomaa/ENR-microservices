@@ -9,4 +9,8 @@ export const RedisKeys = {
      resetOtp(userId: number): string {
     return `reset-password:user:${userId}`;
   },
+
+  signupLimit(ip: string): string {
+  return `signup-limit:ip:${ip}`;
+},
 };
